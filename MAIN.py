@@ -1,101 +1,283 @@
-from datetime import datetime
-from fastapi import FastAPI, Query
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel, Field
 from typing import Optional
+from enum import Enum
+from sqlalchemy import create_engine, inspect
+from sqlalchemy.orm import sessionmaker
+import uvicorn
+from fastapi import Form
+
+import joblib
+import os
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct absolute paths
+transformer_path = os.path.join(base_dir, "models", "column_transformer.pkl")
+main_model_path = os.path.join(base_dir, "models", "main_property_model.pkl")
+portions_model_path = os.path.join(base_dir, "models", "portions_model.pkl")
+
+# Load them
+transformer = joblib.load(transformer_path)
+main_model = joblib.load(main_model_path)
+portions_model = joblib.load(portions_model_path)
+
+print("Successfully loaded AI models!")
+
+import joblib
+import pandas as pd
+from fastapi import HTTPException
+
+# 1. Load the models AND the transformer at startup
+transformer = joblib.load("models/column_transformer.pkl")
+main_model = joblib.load("models/main_property_model.pkl")
+portions_model = joblib.load("models/portions_model.pkl")
 
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
+@app.get("/")
+def read_root():
+       return {"message": "Welcome to the Property API! Go to /docs to see the Swagger UI."}
+from fastapi.middleware.cors import CORSMiddleware
 
-# what an incoming property has to look like
-class Property(BaseModel):
-    area: str
-    price: float
-    bedrooms: int
-    size: float
-    unit: str
-    type: str
+# ... after you define app = FastAPI() ...
 
-# testing data
-karachi_properties = [
-    {"id": 1, "area": "DHA Phase 6", "price": 35000000, "bedrooms": 3, "size": 500, "unit": "sq yds", "type": "house"},
-    {"id": 2, "area": "Clifton", "price": 22000000, "bedrooms": 3, "size": 1800, "unit": "sq ft", "type": "apartment"},
-    {"id": 3, "area": "DHA City", "price": 8500000, "bedrooms": 0, "size": 125, "unit": "sq yds", "type": "plot"}
-]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins (your website)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (POST, GET, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
 
-# 1 Search filter
-@app.get("/search")
-def search_properties(
-    area: Optional[str] = None,
-    max_price: Optional[float] = None,
-    bedrooms: Optional[int] = None,
-    min_size: Optional[float] = None,
-    unit: Optional[str] = None,
-    property_type: Optional[str] = None
-):
-    results = []
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Float
+
+Base = declarative_base()
+# Path to the .db file your friend sent
+db_path = r"C:\Users\Humma\OneDrive\Desktop\python projects\karachi_housing.db"
+engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+# This creates the link between your Class and the Database file
+Base.metadata.create_all(bind=engine)
+
+from pydantic import BaseModel
+
+from sqlalchemy import inspect
+
+
+class PropertyDB(Base):
     
-    for prop in karachi_properties:
-        match = True
+    __tablename__ = "main_properties"
+
+    property_id = Column(Integer, primary_key=True, autoincrement=True)
+    property_type = Column(String)
+    # ignore 'price' and use 'final_price'
+    final_price = Column(Float)
+    location = Column(String)
+    bathrooms = Column(Integer)
+    bedrooms = Column(Integer)
+    purpose = Column(String)
+    area_sq_feet = Column(Float)
+    area_sq_yards = Column(Float)
+
+# Note: In your code, when you want to access the price, 
+# always use 'property.final_price' instead of 'property.price'.
+
+class SizeUnitEnum(str, Enum):
+    sq_yrd = "sq_yrd"
+    sq_ft = "sq_ft"
+    class Config:
+        from_attributes = True
+
+class PurposeEnum(str, Enum):
+    rent = "rent"
+    purchase = "purchase"
+    class Config:
+        from_attributes = True
+
+class PropertyTypeEnum(str, Enum):
+    upper_portion = "upper_portion"
+    lower_portion = "lower_portion"
+    house = "house"
+    apartment = "apartment"
+    class Config:
+        from_attributes = True
+
+class PropertyUpdate(BaseModel):
+    property_id: int= Field(...)
+    location: Optional[str] = None
+    size: Optional[float] = None
+    final_price: float = Field (...)
+    bedrooms: Optional[int] = None
+    bathrooms: Optional[int] = None
+    property_type: Optional[PropertyTypeEnum] = None
+    purpose: Optional[PurposeEnum] = None
+    unit: Optional[SizeUnitEnum] = None
+    class Config:
+        from_attributes = True
+
+class AIInput(BaseModel):
+    location: str
+    property_type: str
+    purpose: str
+    bathrooms: int
+    bedrooms: int
+    area_sq_yards: float
+
+class Property(BaseModel):
+    property_id: int
+    property_type: str
+    location: str
+    bathrooms: int
+    purpose: str
+    bedrooms: int
+    area_sq_feet: float
+    area_sq_yards: float
+    final_price: float
+
+    class Config:
+        from_attributes = True
+
+Property.model_rebuild()
+
+@app.post("/predict_price")
+async def predict_price(data: AIInput):
+    # Convert to title case before creating the DataFrame
+    location = data.location.strip().title()
+    # This creates a dictionary directly from the data received
+    input_dict = {
+        'location': location,
+        'bathrooms': data.bathrooms,
+        'bedrooms': data.bedrooms,
+        'purpose': data.purpose,
+        'property_type': data.property_type,
+        'area_sq_yards': data.area_sq_yards
+    }
+    
+    # Create the DataFrame
+    input_df = pd.DataFrame([input_dict])
+    
+    # Transform and Predict
+    try:
+        processed_data = transformer.transform(input_df)
+        prediction = main_model.predict(processed_data)
+        return {"predicted_price": float(prediction[0])}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+
+engine = create_engine(f"sqlite:///{db_path}")
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Dependency to get a database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
         
-        if area and area.lower() not in prop["area"].lower():
-            match = False
-            
-        if max_price:
-            try:
-                prop_price = float(prop["price"])
-                if prop_price > max_price:
-                    match = False
-            except (ValueError, TypeError):
-                match = False
-                
-        if bedrooms and prop.get("bedrooms") != bedrooms:
-            match = False
-            
-        if unit and unit.lower() != prop.get("unit", "").lower():
-            match = False
-            
-        if min_size and prop.get("size", 0) < min_size:
-            match = False
-            
-        if property_type and property_type.lower() != prop.get("type", "").lower():
-            match = False
-            
-        if match:
-            results.append(prop)
-            
-    return {"results": results}
+# --- SEARCH & FILTER 
+from fastapi import Depends
+from sqlalchemy.orm import Session
 
-# 2 Add a new property
-@app.post("/add-property")
-def add_new_property(new_prop: Property):
-    next_id = max([p["id"] for p in karachi_properties]) + 1 if karachi_properties else 1
-    property_dict = new_prop.model_dump()
-    property_dict["id"] = next_id
-    karachi_properties.append(property_dict)
-    with open("activity_log.txt", "a") as log: log.write(f"[{datetime.now()}] ADDED: Property ID {next_id} in {property_dict['area']}\n")
-    return {"message": "Property added successfully!", "added_property": property_dict}
+@app.get("/properties")
+def get_properties(
+    db: Session = Depends(get_db),
+    area: str = None,
+    purpose: str = None,
+    property_type: str = None,
+    min_price: float = None,
+    max_price: float = None,
+    bedrooms: int = None,
+    bathrooms: int = None,
+    min_sq_feet: float = None,
+    max_sq_feet: float = None,
+    min_sq_yards: float = None,
+    max_sq_yards: float = None,
+):
+    query = db.query(PropertyDB)
 
-# 3 Update an existing property
-@app.put("/update-property/{property_id}")
-def update_property(property_id: int, updated_fields: Property):
-    for prop in karachi_properties:
-        if prop["id"] == property_id:
-            prop["area"] = updated_fields.area
-            prop["price"] = updated_fields.price
-            prop["bedrooms"] = updated_fields.bedrooms
-            prop["size"] = updated_fields.size
-            prop["unit"] = updated_fields.unit
-            prop["type"] = updated_fields.type
-            with open("activity_log.txt", "a") as log: log.write(f"[{datetime.now()}] UPDATED: Property ID {property_id} price changed to {updated_fields.price}\n")
-            return {"message": f"Property {property_id} updated successfully!", "updated_property": prop}
-            
-    return {"error": f"Property with ID {property_id} not found."}
-# 4 Delete a property
-@app.delete("/delete-property/{property_id}")
-def delete_property(property_id: int):
-    for prop in karachi_properties:
-        if prop["id"] == property_id:
-            karachi_properties.remove(prop)
-            with open("activity_log.txt", "a") as log: log.write(f"[{datetime.now()}] DELETED: Property ID {property_id}\n")
-            return {"message": f"Property {property_id} has been removed successfully!"}
-            
-    return {"error": f"Property with ID {property_id} not found."}
+    # Apply filters dynamically
+    if area:
+        query = query.filter(PropertyDB.location.ilike(f"%{area}%")) 
+    if purpose:
+        query = query.filter(PropertyDB.purpose == purpose)
+    if property_type:
+        query = query.filter(PropertyDB.property_type == property_type)
+    if min_price:
+        query = query.filter(PropertyDB.final_price >= min_price)
+    if max_price:
+        query = query.filter(PropertyDB.final_price <= max_price)
+    if bedrooms:
+        query = query.filter(PropertyDB.bedrooms >= bedrooms)
+    if bathrooms:
+        query = query.filter(PropertyDB.bathrooms >= bathrooms)
+    if min_sq_feet:
+        query = query.filter(PropertyDB.area_sq_feet >= min_sq_feet)
+    if max_sq_feet:
+        query = query.filter(PropertyDB.area_sq_feet <= max_sq_feet)
+    if min_sq_yards:
+        query = query.filter(PropertyDB.area_sq_yards >= min_sq_yards)
+    if max_sq_yards:
+        query = query.filter(PropertyDB.area_sq_yards <= max_sq_yards)
+    return query.limit(100).all()
+    
+# --- ADD ---
+
+@app.post("/add_property")
+def add_property(property_data: Property, db: Session = Depends(get_db)):
+    new_property = PropertyDB(
+        location=property_data.location,
+        area_sq_feet=property_data.area_sq_feet,
+        area_sq_yards=property_data.area_sq_yards,
+        final_price=property_data.final_price,
+        bedrooms=property_data.bedrooms,
+        bathrooms=property_data.bathrooms,
+        purpose=property_data.purpose,
+        property_type=property_data.property_type
+    )
+    
+    db.add(new_property)
+    db.commit()
+    db.refresh(new_property)
+    return {"message": "Property added successfully!"}
+
+# --- UPDATE ---
+@app.put("/update_property/{property_id}")
+def update_property(property_id: int, updated_data: dict, db: Session = Depends(get_db)):
+    # Query the DATABASE model (PropertyDB)
+    prop = db.query(PropertyDB).filter(PropertyDB.property_id == property_id).first()
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
+    # Update only provided fields
+    for key, value in updated_data.items():
+        if hasattr(prop, key):
+            setattr(prop, key, value)
+    
+    db.commit()
+    db.refresh(prop)
+    return {"message": "Property updated!"}
+
+# --- DELETE ---
+@app.delete("/delete_property/{property_id}")
+def delete_property(property_id: int, db: Session = Depends(get_db)):
+    # Query the DATABASE model (PropertyDB)
+    prop = db.query(PropertyDB).filter(PropertyDB.property_id == property_id).first()
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
+    db.delete(prop)
+    db.commit()
+    return {"message": "Property deleted!"}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=5002)
+
+from sqlalchemy import inspect
+
+
