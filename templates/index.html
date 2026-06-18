@@ -2,188 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Karachi Real Estate Hub & AI Price Predictor</title>
-    <style>
-        body { font-family: sans-serif; background: #f4f6f9; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .section { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        select, input { width: 100%; padding: 8px; margin: 5px 0; }
-        button { background: #007bff; color: white; border: none; padding: 10px; cursor: pointer; width: 100%; }
-    </style>
+    <title>Karachi Real Estate Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<div class="container">
-    <div class="section" style="background-color: #e3f2fd; padding: 15px; border-radius: 8px;">
-    <h2>AI Price Predictor</h2>
-    <input type="text" id="ai_location" placeholder="Location (e.g., Clifton)">
-    <select id="ai_type">
-        <option value="House">House</option>
-        <option value="Flat">Flat</option>
-    </select>
-    <select id="ai_purpose">
-        <option value="For Sale">For Sale</option>
-        <option value="For Rent">For Rent</option>
-    </select>
-    <input type="number" id="ai_beds" placeholder="Bedrooms">
-    <input type="number" id="ai_baths" placeholder="Bathrooms">
-    <input type="number" id="ai_yards" placeholder="Area in Sq. Yds.">
-    <button onclick="predictPrice()" style="background-color: #28a745;">Predict Price</button>
-    <h3 id="prediction_result"></h3>
-</div>
-    <div class="section">
-        <h2>Search Properties</h2>
-        <select id="s_area"><option value="">Any Area</option><option value="Clifton">Clifton</option><option value="DHA">DHA</option></select>
-        <select id="s_purpose"><option value="">Any Purpose</option><option value="sale">Sale</option><option value="rent">Rent</option></select>
-        <select id="s_type">
-            <option value="">Any Type</option>
-            <option value="Apartment">Apartment</option>
-            <option value="House">House</option>
-            <option value="Penthouse">Penthouse</option>
-            <option value="Upper Portion">Upper Portion</option>
-            <option value="Lower Portion">Lower Portion</option>
-        </select>
-        <input type="number" id="s_min_price" placeholder="Min Price">
-        <input type="number" id="s_max_price" placeholder="Max Price">
-        <input type="number" id="s_beds" placeholder="Min Bedrooms">
-        <input type="number" id="s_baths" placeholder="Min Bathrooms">
-        <button onclick="searchProperties()">Search</button>
+<body class="bg-gray-100 p-8">
+
+<div class="max-w-4xl mx-auto">
+    <div class="flex gap-4 mb-8">
+        <button onclick="showView('ai-view')" class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-bold">AI Price Predictor</button>
+        <button onclick="showView('search-view')" class="flex-1 bg-green-600 text-white py-3 rounded-lg font-bold">Manage Properties</button>
     </div>
 
-    <div class="section">
-        <h2>Add Property</h2>
-        <input type="number" id="a_id" placeholder="ID (Unique Number)">
-        <input type="text" id="a_area" placeholder="Area Name">
-        <input type="number" name="size" placeholder="Enter size">
-        <input type="number" id="a_price" placeholder="Price">
-        <input type="number" id="a_beds" placeholder="Bedrooms">
-        <input type="number" id="a_baths" placeholder="Bathrooms">
-        <select id="a_type">
-            <option value="Apartment">Apartment</option>
-            <option value="House">House</option>
-            <option value="Penthouse">Penthouse</option>
-            <option value="Upper Portion">Upper Portion</option>
-            <option value="Lower Portion">Lower Portion</option>
-        </select>
-        <select name="purpose">
-    <option value="" disabled selected>Any Purpose</option>
-    <option value="sale">Sale</option>
-    <option value="rent">Rent</option>
-        </select>
-        <select id="a_unit"><option value="Sq. Yds.">Sq. Yds.</option><option value="Sq. Ft.">Sq. Ft.</option></select>
-        <button onclick="addProperty()">Add Property</button>
-    </div>
-    <div class="section">
-        <h2>Update Price</h2>
-        <input type="number" id="u_id" placeholder="Property ID to Update">
-        <input type="number" id="u_price" placeholder="New Price">
-        <button onclick="updateProperty()">Update Price</button>
+    <div id="ai-view" class="hidden bg-white p-8 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-bold mb-6">AI Price Predictor</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <input type="text" id="ai_location" placeholder="Location (e.g., Clifton)" class="p-3 border rounded">
+            <select id="ai_type" class="p-3 border rounded"><option>House</option><option>Flat</option></select>
+            <select id="ai_purpose" class="p-3 border rounded"><option>For Sale</option><option>For Rent</option></select>
+            <input type="number" id="ai_beds" placeholder="Bedrooms" class="p-3 border rounded">
+            <input type="number" id="ai_baths" placeholder="Bathrooms" class="p-3 border rounded">
+            <input type="number" id="ai_yards" placeholder="Area in Sq. Yds." class="p-3 border rounded">
+        </div>
+        <button onclick="predictPrice()" class="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-bold">Predict Price</button>
+        <h3 id="prediction_result" class="mt-4 font-bold text-center"></h3>
     </div>
 
-    <div class="section">
-        <h2>Delete Property</h2>
-        <input type="number" id="d_id" placeholder="Property ID to Delete">
-        <button onclick="deleteProperty()">Delete Property</button>
-    </div>
+    <div id="search-view" class="hidden space-y-6">
+        
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <h2 class="text-xl font-bold mb-4">Search Properties</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <select id="s_area" class="p-2 border rounded"><option value="">Any Area</option></select>
+                <select id="s_purpose" class="p-2 border rounded"><option value="">Any Purpose</option><option value="sale">Sale</option><option value="rent">Rent</option></select>
+                <select id="s_type" class="p-2 border rounded">
+                    <option value="">Any Type</option>
+                    <option value="House">House</option>
+                    <option value="Flat">Flat</option>
+                    <option value="Upper Portion">Upper Portion</option>
+                    <option value="Lower Portion">Lower Portion</option>
+                </select>
+                <input type="number" id="s_baths" placeholder="Min Baths" class="p-2 border rounded">
+                <input type="number" id="s_beds" placeholder="Min Beds" class="p-2 border rounded">
+                <input type="number" id="s_max_price" placeholder="Max Price" class="p-2 border rounded">
+                <input type="number" id="s_min_price" placeholder="Min Price" class="p-2 border rounded">
+            </div>
+            <button onclick="searchProperties()" class="w-full mt-4 bg-green-600 text-white py-2 rounded font-bold">Search</button>
+            <div id="results" class="mt-4 p-2 bg-gray-50 rounded"></div>
+        </div>
 
-    <div id="results"></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="font-bold mb-2">Add Property</h2>
+                <input type="number" id="a_id" placeholder="ID" class="w-full p-2 border mb-2">
+                <input type="text" id="a_area" placeholder="Area" class="w-full p-2 border mb-2">
+                <input type="number" id="a_price" placeholder="Price" class="w-full p-2 border mb-2">
+                <input type="number" id="a_beds" placeholder="Beds" class="w-full p-2 border mb-2">
+                <input type="number" id="a_baths" placeholder="Baths" class="w-full p-2 border mb-2">
+                <select id="a_type" class="w-full p-2 border mb-2">
+                    <option value="House">House</option>
+                    <option value="Flat">Flat</option>
+                    <option value="Upper Portion">Upper Portion</option>
+                    <option value="Lower Portion">Lower Portion</option>
+                </select>
+                <button onclick="addProperty()" class="w-full bg-indigo-600 text-white py-2 mt-2 rounded">Add</button>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="font-bold mb-2">Update Price</h2>
+                <input type="number" id="u_id" placeholder="ID" class="w-full p-2 border mb-2">
+                <input type="number" id="u_price" placeholder="New Price" class="w-full p-2 border mb-2">
+                <button onclick="updateProperty()" class="w-full bg-yellow-600 text-white py-2 mt-2 rounded">Update</button>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="font-bold mb-2">Delete Property</h2>
+                <input type="number" id="d_id" placeholder="ID" class="w-full p-2 border mb-2">
+                <button onclick="deleteProperty()" class="w-full bg-red-600 text-white py-2 mt-2 rounded">Delete</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    async function addProperty() {
-    const payload = {
-        // Use the names that match your Pydantic model (Property)
-        location: document.getElementById('a_area').value, 
-        area_sq_feet: parseFloat(document.getElementById('a_sq_feet').value),
-        area_sq_yards: parseFloat(document.getElementById('a_sq_yards').value),
-        final_price: parseFloat(document.getElementById('a_price').value),
-        bedrooms: parseInt(document.getElementById('a_beds').value),
-        bathrooms: parseInt(document.getElementById('a_baths').value),
-        purpose: document.getElementById('a_purpose').value,
-        property_type: document.getElementById('a_type').value
-    };
-    let url = `/properties?area=${area}&purpose=${purpose}&property_type=${type}`;
-    if (min) url += `&min_price=${min}`;
-    if (max) url += `&max_price=${max}`;
-
-    const res = await fetch(url);
-    const data = await res.json();
-    
-    // Display the results
-    document.getElementById('results').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-}
-
-    async function addProperty() {
-    const payload = {
-        property_id: parseInt(document.getElementById('a_id').value),
-        location: document.getElementById('a_area').value,
-        final_price: parseFloat(document.getElementById('a_price').value),
-        bedrooms: parseInt(document.getElementById('a_beds').value),
-        bathrooms: parseInt(document.getElementById('a_baths').value),
-        property_type: document.getElementById('a_type').value,
-        purpose: document.querySelector('select[name="purpose"]').value,
-        area_sq_feet: 0, // Fill these correctly
-        area_sq_yards: 0
-    };
-
-    const res = await fetch('/add_property', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload)
-    });
-    
-    if (res.ok) {
-        alert("Property Added!");
-    } else {
-        alert("Error adding property");
+    function showView(viewId) {
+        document.getElementById('ai-view').classList.add('hidden');
+        document.getElementById('search-view').classList.add('hidden');
+        document.getElementById(viewId).classList.remove('hidden');
     }
-}
-async function predictPrice() {
-        const payload = {
-            location: document.getElementById('ai_location').value,
-            property_type: document.getElementById('ai_type').value,
-            purpose: document.getElementById('ai_purpose').value,
-            bathrooms: parseInt(document.getElementById('ai_baths').value),
-            bedrooms: parseInt(document.getElementById('ai_beds').value),
-            area_sq_yards: parseFloat(document.getElementById('ai_yards').value)
-        };
-
-        const res = await fetch('http://127.0.0.1:5002/predict_price', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        
-        if (res.ok) {
-            document.getElementById('prediction_result').innerText = 
-                "Predicted Price: PKR " + Math.round(data.predicted_price).toLocaleString();
-        } else {
-            alert("Error: " + JSON.stringify(data));
-        }
-    }
-
-    async function updateProperty() {
-    const id = document.getElementById('u_id').value;
-    const price = document.getElementById('u_price').value;
-
-    const res = await fetch(`/update_property/${id}`, {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ final_price: parseFloat(price) }) // Matches DB column
-    });
-    
-    if (res.ok) alert("Property Updated!");
-    else alert("Error updating property");
-}
-
-    async function deleteProperty() {
-    const id = document.getElementById('d_id').value;
-    const res = await fetch(`/delete_property/${id}`, { method: 'DELETE' });
-    
-    if (res.ok) alert("Property Deleted!");
-    else alert("Error deleting property");
-}
 </script>
 </body>
 </html>

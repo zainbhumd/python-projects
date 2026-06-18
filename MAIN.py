@@ -8,6 +8,15 @@ from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import sessionmaker
 import uvicorn
 from fastapi import Form
+import os
+from dotenv import load_dotenv
+
+# This looks for a file named .env in your project folder
+load_dotenv() 
+
+# Now you can access your secrets like this:
+DATABASE_URL = os.getenv("DATABASE_URL")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 import joblib
 import os
@@ -37,20 +46,25 @@ portions_model = joblib.load("models/portions_model.pkl")
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
-@app.get("/")
-def read_root():
-       return {"message": "Welcome to the Property API! Go to /docs to see the Swagger UI."}
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.responses import FileResponse
+
+@app.get("/")
+async def home():
+    return FileResponse("templates/index.html")
 # ... after you define app = FastAPI() ...
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins (your website)
+    allow_origins=[os.getenv("ALLOWED_ORIGIN", "*")],
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods (POST, GET, etc.)
     allow_headers=["*"],  # Allows all headers
 )
+@app.get("/healthz")
+async def health():
+    return {"status": "ok"}
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Float
@@ -226,6 +240,15 @@ def get_properties(
         query = query.filter(PropertyDB.area_sq_yards <= max_sq_yards)
     return query.limit(100).all()
     
+@app.get("/get_all_areas")
+async def get_all_areas():
+    # Modify the query based on your table/column names
+    query = "SELECT DISTINCT location FROM properties" 
+    results = PropertyDB.execute(query).fetchall()
+    # Convert list of tuples to a flat list of strings
+    areas = [row[0] for row in results]
+    return {"areas": areas}
+
 # --- ADD ---
 
 @app.post("/add_property")
