@@ -10,7 +10,7 @@ This project was built as a coordinated full-stack engineering effort:
 
 * **[Muhammad Rayan](https://github.com/rayisdbest)** — *Data Science, Machine Learning, & Database Engineering*
 * 
-   **Data Pipeline Engineering**: Designed and optimized an automated ETL (Extract, Transform, Load) pipeline to ingest large-scale national datasets. Engineered data cleaning protocols to sanitize real estate records, including automated imputation of missing values, outlier filtration, and the application of dynamic inflation-adjustment metrics to ensure accurate market valuations.
+   **Data Pipeline Engineering**: Designed and optimized an automated ETL (Extract, Transform, Load) pipeline to ingest large-scale national datasets. Engineered data cleaning protocols to sanitize real estate records, including automated imputation of missing values, outlier filtration, and the application of dynamic inflation-adjustment metrics to ensure accurate market valuations.                                                                                           
    **Predictive Machine Learning**: Developed a high-precision valuation engine using the HistGradientBoostingRegressor. Implemented complex pre-processing workflows, including custom feature scaling and encoding strategies, to effectively handle mixed-type categorical and numerical datasets with high variance.
    **Database Architecture**: Architected and normalized the structural SQL database schema. Leveraged Python’s sqlite3 driver to initialize a robust, persistent ledger system that ensures data integrity and high-performance querying for the platform’s real-time retrieval requirements.
 
