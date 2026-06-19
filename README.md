@@ -84,7 +84,7 @@ This project was built as a coordinated full-stack engineering effort:
 └── 📜 README.md                 # Project Overview Documentation
 ---
 
-### 🚀 𝗤𝘂𝗶𝗰𝗸 𝗦𝘁𝗮𝗿𝘁
+   🚀 𝗤𝘂𝗶𝗰𝗸 𝗦𝘁𝗮𝗿𝘁
 1. Clone the repository: `git clone https://github.com/zainbhumd/python-projects.git`
 2. Install dependencies: `pip install -r requirements.txt`
 3. Launch the server: `uvicorn MAIN:app --reload`
