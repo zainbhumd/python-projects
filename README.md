@@ -39,11 +39,6 @@ This project was built as a coordinated full-stack engineering effort:
 "The platform is fully containerized and deployed via Render’s CI/CD pipeline. The production environment utilizes an ASGI server (Uvicorn) with automated health-check monitoring to ensure 99.9% uptime for the valuation engine."
 
 
-# **Why This Stack?**
-**FastAPI & SQLAlchemy**: Chosen for the ability to handle asynchronous tasks efficiently while providing strict data schema enforcement.
-
-**Tailwind CSS**: Selected to minimize bundle sizes and maintain consistent design systems across the entire application without the overhead of heavy framework dependencies.
-
 ## ⚠️ Data Limitations & Future Scope
 * **Data Volume Constraint:** While the predictive engine is optimized using a `HistGradientBoostingRegressor`, real-world property markets fluctuate rapidly. Because national real estate data can be limited or sparse in specific sub-localities, certain niche property predictions may exhibit variance. 
 * **Next Steps:** Future iterations of this project will involve setting up web-scrapers to continuously feed live data into the pipeline to improve model accuracy across all sectors of Karachi.
@@ -55,6 +50,12 @@ This project was built as a coordinated full-stack engineering effort:
 * **Backend Framework:** FastAPI, Uvicorn ASGI Server, SQLAlchemy ORM, Pydantic
 * **Database Storage:** SQLite3 Relational Engine
 * **Frontend Web Layout:** HTML5, JavaScript (Fetch API Engine), Tailwind CSS (Utility Framework)
+
+
+# **Why This Stack?**
+**FastAPI & SQLAlchemy**: Chosen for the ability to handle asynchronous tasks efficiently while providing strict data schema enforcement.
+
+**Tailwind CSS**: Selected to minimize bundle sizes and maintain consistent design systems across the entire application without the overhead of heavy framework dependencies.
 
 ---
 
