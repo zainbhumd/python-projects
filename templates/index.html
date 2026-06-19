@@ -19,9 +19,9 @@
             <input type="text" id="ai_location" placeholder="Location (e.g., Clifton)" class="p-3 border rounded">
             <select id="ai_type" class="p-3 border rounded"><option>House</option><option>Flat</option></select>
             <select id="ai_purpose" class="p-3 border rounded"><option>For Sale</option><option>For Rent</option></select>
-            <input type="number" id="ai_beds" placeholder="Bedrooms" class="p-3 border rounded">
-            <input type="number" id="ai_baths" placeholder="Bathrooms" class="p-3 border rounded">
-            <input type="number" id="ai_yards" placeholder="Area in Sq. Yds." class="p-3 border rounded">
+            <input type="text" id="ai_beds" placeholder="Bedrooms" class="p-3 border rounded">
+            <input type="text" id="ai_baths" placeholder="Bathrooms" class="p-3 border rounded">
+            <input type="text" id="ai_yards" placeholder="Area in Sq. Yds." class="p-3 border rounded">
         </div>
         <button onclick="predictPrice()" class="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-bold">Predict Price</button>
         <h3 id="prediction_result" class="mt-4 font-bold text-center"></h3>
@@ -41,10 +41,14 @@
                     <option value="Upper Portion">Upper Portion</option>
                     <option value="Lower Portion">Lower Portion</option>
                 </select>
-                <input type="number" id="s_baths" placeholder="Min Baths" class="p-2 border rounded">
-                <input type="number" id="s_beds" placeholder="Min Beds" class="p-2 border rounded">
-                <input type="number" id="s_max_price" placeholder="Max Price" class="p-2 border rounded">
-                <input type="number" id="s_min_price" placeholder="Min Price" class="p-2 border rounded">
+                <input type="text" id="s_baths" placeholder="Min Baths" class="p-2 border rounded">
+                <input type="text" id="s_beds" placeholder="Min Beds" class="p-2 border rounded">
+                <input type="text" id="s_max_price" placeholder="Max Price" class="p-2 border rounded">
+                <input type="text" id="s_min_price" placeholder="Min Price" class="p-2 border rounded">
+                <input type="text" id="s_min_sq_feet" placeholder="Min Area (Sq. Ft.)" class="p-2 border rounded">
+                <input type="text" id="s_max_sq_feet" placeholder="Max Area (Sq. Ft.)" class="p-2 border rounded">
+                <input type="text" id="s_min_sq_yards" placeholder="Min Area (Sq. Yds.)" class="p-2 border rounded">
+                <input type="text" id="s_max_sq_yards" placeholder="Max Area (Sq. Yds.)" class="p-2 border rounded">
             </div>
             <button onclick="searchProperties()" class="w-full mt-4 bg-green-600 text-white py-2 rounded font-bold">Search</button>
             <div id="results" class="mt-4 p-2 bg-gray-50 rounded"></div>
@@ -53,11 +57,12 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-white p-6 rounded-xl shadow-md">
                 <h2 class="font-bold mb-2">Add Property</h2>
-                <input type="number" id="a_id" placeholder="ID" class="w-full p-2 border mb-2">
+                <input type="text" id="a_id" placeholder="ID" class="w-full p-2 border mb-2">
                 <input type="text" id="a_area" placeholder="Area" class="w-full p-2 border mb-2">
-                <input type="number" id="a_price" placeholder="Price" class="w-full p-2 border mb-2">
-                <input type="number" id="a_beds" placeholder="Beds" class="w-full p-2 border mb-2">
-                <input type="number" id="a_baths" placeholder="Baths" class="w-full p-2 border mb-2">
+                <input type="text" id="a_price" placeholder="Price" class="w-full p-2 border mb-2">
+                <input type="text" id="a_beds" placeholder="Beds" class="w-full p-2 border mb-2">
+                <input type="text" id="a_baths" placeholder="Baths" class="w-full p-2 border mb-2">
+                <input type="text" id="a_yards" placeholder="Area in Sq. Yds." class="w-full p-2 border mb-2">
                 <select id="a_type" class="w-full p-2 border mb-2">
                     <option value="House">House</option>
                     <option value="Flat">Flat</option>
@@ -68,13 +73,13 @@
             </div>
             <div class="bg-white p-6 rounded-xl shadow-md">
                 <h2 class="font-bold mb-2">Update Price</h2>
-                <input type="number" id="u_id" placeholder="ID" class="w-full p-2 border mb-2">
-                <input type="number" id="u_price" placeholder="New Price" class="w-full p-2 border mb-2">
+                <input type="text" id="u_id" placeholder="ID" class="w-full p-2 border mb-2">
+                <input type="text" id="u_price" placeholder="New Price" class="w-full p-2 border mb-2">
                 <button onclick="updateProperty()" class="w-full bg-yellow-600 text-white py-2 mt-2 rounded">Update</button>
             </div>
             <div class="bg-white p-6 rounded-xl shadow-md">
                 <h2 class="font-bold mb-2">Delete Property</h2>
-                <input type="number" id="d_id" placeholder="ID" class="w-full p-2 border mb-2">
+                <input type="text" id="d_id" placeholder="ID" class="w-full p-2 border mb-2">
                 <button onclick="deleteProperty()" class="w-full bg-red-600 text-white py-2 mt-2 rounded">Delete</button>
             </div>
         </div>

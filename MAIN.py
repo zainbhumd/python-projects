@@ -12,7 +12,7 @@ import os
 from dotenv import load_dotenv
 
 # This looks for a file named .env in your project folder
-load_dotenv() 
+load_dotenv()
 
 # Now you can access your secrets like this:
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -82,7 +82,7 @@ from sqlalchemy import inspect
 
 
 class PropertyDB(Base):
-    
+   
     __tablename__ = "main_properties"
 
     property_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -96,7 +96,7 @@ class PropertyDB(Base):
     area_sq_feet = Column(Float)
     area_sq_yards = Column(Float)
 
-# Note: In your code, when you want to access the price, 
+# Note: In your code, when you want to access the price,
 # always use 'property.final_price' instead of 'property.price'.
 
 class SizeUnitEnum(str, Enum):
@@ -136,9 +136,9 @@ class AIInput(BaseModel):
     location: str
     property_type: str
     purpose: str
-    bathrooms: int
-    bedrooms: int
-    area_sq_yards: float
+    bathrooms: str
+    bedrooms: str
+    area_sq_yards: str
 
 class Property(BaseModel):
     property_id: int
@@ -160,19 +160,25 @@ Property.model_rebuild()
 async def predict_price(data: AIInput):
     # Convert to title case before creating the DataFrame
     location = data.location.strip().title()
+    try:
+        baths = int(data.bathrooms) if data.bathrooms and str(data.bathrooms).strip() != "" else 0
+        beds = int(data.bedrooms) if data.bedrooms and str(data.bedrooms).strip() != "" else 0
+        yards = float(data.area_sq_yards) if data.area_sq_yards and str(data.area_sq_yards).strip() != "" else 0.0
+    except ValueError:
+        return {"error": "Please ensure numeric properties (Beds, Baths, Yards) contain clean numbers."}
     # This creates a dictionary directly from the data received
     input_dict = {
         'location': location,
-        'bathrooms': data.bathrooms,
-        'bedrooms': data.bedrooms,
+        'bathrooms': baths,
+        'bedrooms': beds,
         'purpose': data.purpose,
         'property_type': data.property_type,
-        'area_sq_yards': data.area_sq_yards
+        'area_sq_yards': yards
     }
-    
+   
     # Create the DataFrame
     input_df = pd.DataFrame([input_dict])
-    
+   
     # Transform and Predict
     try:
         processed_data = transformer.transform(input_df)
@@ -193,8 +199,8 @@ def get_db():
         yield db
     finally:
         db.close()
-        
-# --- SEARCH & FILTER 
+       
+# --- SEARCH & FILTER
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
@@ -204,20 +210,28 @@ def get_properties(
     area: str = None,
     purpose: str = None,
     property_type: str = None,
-    min_price: float = None,
-    max_price: float = None,
-    bedrooms: int = None,
-    bathrooms: int = None,
-    min_sq_feet: float = None,
-    max_sq_feet: float = None,
-    min_sq_yards: float = None,
-    max_sq_yards: float = None,
+    min_price: str = None,
+    max_price: str = None,
+    bedrooms: str = None,
+    bathrooms: str = None,
+    min_sq_feet: str = None,
+    max_sq_feet: str = None,
+    min_sq_yards: str = None,
+    max_sq_yards: str = None,
 ):
+    min_price = int(min_price) if min_price and str(min_price).strip() != "" else None
+    max_price = int(max_price) if max_price and str(max_price).strip() != "" else None
+    bedrooms = int(bedrooms) if bedrooms and str(bedrooms).strip() != "" else None
+    bathrooms = int(bathrooms) if bathrooms and str(bathrooms).strip() != "" else None
+    min_sq_feet = float(min_sq_feet) if min_sq_feet and str(min_sq_feet).strip() != "" else None
+    max_sq_feet = float(max_sq_feet) if max_sq_feet and str(max_sq_feet).strip() != "" else None
+    min_sq_yards = float(min_sq_yards) if min_sq_yards and str(min_sq_yards).strip() != "" else None
+    max_sq_yards = float(max_sq_yards) if max_sq_yards and str(max_sq_yards).strip() != "" else None
     query = db.query(PropertyDB)
 
     # Apply filters dynamically
     if area:
-        query = query.filter(PropertyDB.location.ilike(f"%{area}%")) 
+        query = query.filter(PropertyDB.location.ilike(f"%{area}%"))
     if purpose:
         query = query.filter(PropertyDB.purpose == purpose)
     if property_type:
@@ -239,14 +253,12 @@ def get_properties(
     if max_sq_yards:
         query = query.filter(PropertyDB.area_sq_yards <= max_sq_yards)
     return query.limit(100).all()
-    
+   
 @app.get("/get_all_areas")
-async def get_all_areas():
-    # Modify the query based on your table/column names
-    query = "SELECT DISTINCT location FROM properties" 
-    results = PropertyDB.execute(query).fetchall()
-    # Convert list of tuples to a flat list of strings
-    areas = [row[0] for row in results]
+async def get_all_areas(db: Session = Depends(get_db)):
+    results = db.query(PropertyDB.location).distinct().all()
+    areas = [row[0] for row in results if row[0]]
+    areas.sort()
     return {"areas": areas}
 
 # --- ADD ---
@@ -263,7 +275,7 @@ def add_property(property_data: Property, db: Session = Depends(get_db)):
         purpose=property_data.purpose,
         property_type=property_data.property_type
     )
-    
+   
     db.add(new_property)
     db.commit()
     db.refresh(new_property)
@@ -276,12 +288,12 @@ def update_property(property_id: int, updated_data: dict, db: Session = Depends(
     prop = db.query(PropertyDB).filter(PropertyDB.property_id == property_id).first()
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
-    
+   
     # Update only provided fields
     for key, value in updated_data.items():
         if hasattr(prop, key):
             setattr(prop, key, value)
-    
+   
     db.commit()
     db.refresh(prop)
     return {"message": "Property updated!"}
@@ -293,7 +305,7 @@ def delete_property(property_id: int, db: Session = Depends(get_db)):
     prop = db.query(PropertyDB).filter(PropertyDB.property_id == property_id).first()
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
-    
+   
     db.delete(prop)
     db.commit()
     return {"message": "Property deleted!"}
@@ -302,5 +314,3 @@ if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=5002)
 
 from sqlalchemy import inspect
-
-
