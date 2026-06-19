@@ -52,7 +52,7 @@ This project was built as a coordinated full-stack engineering effort:
 * **Frontend Web Layout:** HTML5, JavaScript (Fetch API Engine), Tailwind CSS (Utility Framework)
 
 
-## Why this stack?
+## 𝗪𝗵𝘆 𝘁𝗵𝗶𝘀 𝘀𝘁𝗮𝗰𝗸?
 **FastAPI & SQLAlchemy**: Chosen for the ability to handle asynchronous tasks efficiently while providing strict data schema enforcement.
 
 **Tailwind CSS**: Selected to minimize bundle sizes and maintain consistent design systems across the entire application without the overhead of heavy framework dependencies.
@@ -82,6 +82,7 @@ This project was built as a coordinated full-stack engineering effort:
 ├── 📜 train_models.py           # Model Training & Pipeline Serialization Script
 ├── 📜 build_database.py         # Relational DB Engine Migration Script
 └── 📜 README.md                 # Project Overview Documentation
+---
 
 ### 🚀 𝗤𝘂𝗶𝗰𝗸 𝗦𝘁𝗮𝗿𝘁
 1. Clone the repository: `git clone https://github.com/zainbhumd/python-projects.git`
