@@ -52,7 +52,7 @@ This project was built as a coordinated full-stack engineering effort:
 * **Frontend Web Layout:** HTML5, JavaScript (Fetch API Engine), Tailwind CSS (Utility Framework)
 
 
-# **Why This Stack?**
+# *Why This Stack?*
 **FastAPI & SQLAlchemy**: Chosen for the ability to handle asynchronous tasks efficiently while providing strict data schema enforcement.
 
 **Tailwind CSS**: Selected to minimize bundle sizes and maintain consistent design systems across the entire application without the overhead of heavy framework dependencies.
