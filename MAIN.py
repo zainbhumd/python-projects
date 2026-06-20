@@ -160,6 +160,8 @@ Property.model_rebuild()
 async def predict_price(data: AIInput):
     # Convert to title case before creating the DataFrame
     location = data.location.strip().title()
+    if location.startswith("Dha "):
+        location = location.replace("Dha ", "DHA ", 1)
     try:
         baths = int(data.bathrooms) if data.bathrooms and str(data.bathrooms).strip() != "" else 0
         beds = int(data.bedrooms) if data.bedrooms and str(data.bedrooms).strip() != "" else 0

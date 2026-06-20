@@ -28,7 +28,7 @@
     </div>
 
     <div id="search-view" class="hidden space-y-6">
-        
+       
         <div class="bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-xl font-bold mb-4">Search Properties</h2>
             <div class="grid grid-cols-2 gap-3">
@@ -91,6 +91,142 @@
         document.getElementById('ai-view').classList.add('hidden');
         document.getElementById('search-view').classList.add('hidden');
         document.getElementById(viewId).classList.remove('hidden');
+    }
+   
+    const API_URL = "https://python-projects-0vyq.onrender.com/";
+
+    // --- 1. AI PRICE PREDICTOR FUNCTION ---
+    async function predictPrice() {
+        const payload = {
+            location: document.getElementById('ai_location').value,
+            property_type: document.getElementById('ai_type').value,
+            purpose: document.getElementById('ai_purpose').value,
+            bathrooms: document.getElementById('ai_baths').value,
+            bedrooms: document.getElementById('ai_beds').value,
+            area_sq_yards: document.getElementById('ai_yards').value
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/predict_price`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (data.error) {
+                document.getElementById('prediction_result').innerText = "Error: " + data.error;
+            } else {
+                document.getElementById('prediction_result').innerText = `Predicted Price: PKR ${data.predicted_price.toLocaleString()}`;
+            }
+        } catch (err) {
+            console.error(err);
+            document.getElementById('prediction_result').innerText = "Cannot connect to backend server.";
+        }
+    }
+
+    // --- 2. SEARCH PROPERTIES FUNCTION ---
+    async function searchProperties() {
+        const params = new URLSearchParams({
+            area: document.getElementById('s_area').value,
+            purpose: document.getElementById('s_purpose').value,
+            property_type: document.getElementById('s_type').value,
+            bathrooms: document.getElementById('s_baths').value,
+            bedrooms: document.getElementById('s_beds').value,
+            max_price: document.getElementById('s_max_price').value,
+            min_price: document.getElementById('s_min_price').value,
+            min_sq_feet: document.getElementById('s_min_sq_feet').value,
+            max_sq_feet: document.getElementById('s_max_sq_feet').value,
+            min_sq_yards: document.getElementById('s_min_sq_yards').value,
+            max_sq_yards: document.getElementById('s_max_sq_yards').value,
+        });
+
+        try {
+            const response = await fetch(`${API_URL}/properties?${params.toString()}`);
+            const data = await response.json();
+           
+            // Basic layout rendering loop for results box
+            let html = `<h4 class="font-bold mb-2">Results (${data.length}):</h4>`;
+            if (data.length === 0) html += "<p class='text-sm text-gray-500'>No properties found matching criteria.</p>";
+            data.forEach(p => {
+                html += `<div class="border-b py-2 text-sm">
+                    <strong>ID: ${p.property_id}</strong> - ${p.location} (${p.property_type} For ${p.purpose})<br>
+                    Price: PKR ${p.final_price.toLocaleString()} | Beds: ${p.bedrooms} | Baths: ${p.bathrooms} | Yards: ${p.area_sq_yards}
+                </div>`;
+            });
+            document.getElementById('results').innerHTML = html;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('results').innerText = "Failed to fetch search results.";
+        }
+    }
+
+    // --- 3. ADD PROPERTY FUNCTION ---
+    async function addProperty() {
+        // Matches Pydantic 'Property' schema in MAIN.py expects numeric types for validation
+        const payload = {
+            property_id: parseInt(document.getElementById('a_id').value) || 0,
+            location: document.getElementById('a_area').value,
+            final_price: parseFloat(document.getElementById('a_price').value) || 0.0,
+            bedrooms: parseInt(document.getElementById('a_beds').value) || 0,
+            bathrooms: parseInt(document.getElementById('a_baths').value) || 0,
+            area_sq_yards: parseFloat(document.getElementById('a_yards').value) || 0.0,
+            area_sq_feet: (parseFloat(document.getElementById('a_yards').value) || 0.0) * 9.0, // Automatic conversion calculation
+            property_type: document.getElementById('a_type').value,
+            purpose: "Sale" // Standard default assignment matching UI visibility scope
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/add_property`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            alert(data.message || data.detail);
+        } catch (err) {
+            console.error(err);
+            alert("Error sending addition request to backend.");
+        }
+    }
+
+    // --- 4. UPDATE PROPERTY FUNCTION ---
+    async function updateProperty() {
+        const id = document.getElementById('u_id').value;
+        const payload = {
+            final_price: parseFloat(document.getElementById('u_price').value) || 0.0
+        };
+
+        if(!id) return alert("Please specify a valid property ID.");
+
+        try {
+            const response = await fetch(`${API_URL}/update_property/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            alert(data.message || data.detail);
+        } catch (err) {
+            console.error(err);
+            alert("Error sending update request.");
+        }
+    }
+
+    // --- 5. DELETE PROPERTY FUNCTION ---
+    async function deleteProperty() {
+        const id = document.getElementById('d_id').value;
+        if(!id) return alert("Please specify a target property ID.");
+
+        try {
+            const response = await fetch(`${API_URL}/delete_property/${id}`, {
+                method: "DELETE"
+            });
+            const data = await response.json();
+            alert(data.message || data.detail);
+        } catch (err) {
+            console.error(err);
+            alert("Error sending deletion request.");
+        }
     }
 </script>
 </body>
