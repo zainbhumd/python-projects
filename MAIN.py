@@ -23,7 +23,8 @@ from sqlalchemy import func
 app = FastAPI()
 Base = declarative_base()
 # Use relative path for Render/GitHub compatibility
-db_path = r"C:\Users\Humma\OneDrive\Desktop\python projects\karachi_housing.db"
+import os
+db_path = os.path.join(os.path.dirname(__file__), "karachi_housing.db")
 engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
