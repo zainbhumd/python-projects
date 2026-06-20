@@ -89,3 +89,6 @@ This project was built as a coordinated full-stack engineering effort:
 2. Install dependencies: `pip install -r requirements.txt`
 3. Launch the server: `uvicorn MAIN:app --reload`
 4. Access the interface: `http://127.0.0.1:5002`
+5. **Activity Logs** 
+To view the application's activity history (all additions, updates, or deletions), you can access the logs directly via the API once the server is running:
+http://127.0.0.1:5002/get_logs
