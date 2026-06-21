@@ -1,6 +1,6 @@
-# ZameenAI: Karachi Real Estate Portal & ML Valuation Engine
+# Karachi Real Estate Hub & AI Price Predictor
 
-ZameenAI is an end-to-end real estate intelligence platform designed to bridge the gap between raw property data and actionable market insights in the Pakistani housing market. By integrating a high-precision predictive engine directly with a responsive full-stack web interface, ZameenAI enables users to instantly forecast property valuations, perform complex market filtering, and manage listings in real-time. Designed to solve the issue of data opacity in the Pakistani housing sector, the project transforms unorganized market records into an administrative-grade, AI-driven valuation tool that offers unparalleled transparency for the Karachi real estate market.
+Karachi Real Estate Hub is an end-to-end real estate intelligence platform designed to bridge the gap between raw property data and actionable market insights in the Pakistani housing market. By integrating a high-precision predictive engine directly with a responsive full-stack web interface, Karachi Real Estate Hub enables users to instantly forecast property valuations, perform complex market filtering, and manage listings in real-time. Designed to solve the issue of data opacity in the Pakistani housing sector, the project transforms unorganized market records into an administrative-grade, AI-driven valuation tool that offers unparalleled transparency for the Karachi real estate market.
 
 ---
 
@@ -88,7 +88,6 @@ This project was built as a coordinated full-stack engineering effort:
 1. Clone the repository: `git clone https://github.com/zainbhumd/python-projects.git`
 2. Install dependencies: `pip install -r requirements.txt`
 3. Launch the server: `uvicorn MAIN:app --reload`
-4. Access the interface: `http://127.0.0.1:5002`
-5. **Activity Logs** 
+4. **Activity Logs** 
 To view the application's activity history (all additions, updates, or deletions), you can access the logs directly via the API once the server is running:
 http://127.0.0.1:5002/get_logs
