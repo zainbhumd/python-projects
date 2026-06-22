@@ -40,6 +40,7 @@ This project was built as a coordinated full-stack engineering effort:
 
 
 ## ⚠️ Data Limitations & Future Scope
+* **Model Performance:** Both predictive engines achieved an average accuracy of 87-88% with the parameters of 90% training and 10% testing split for the 'portions_model' and 80% training and 20% testing split for the 'main_property_model'.
 * **Data Volume Constraint:** While the predictive engine is optimized using a `HistGradientBoostingRegressor`, real-world property markets fluctuate rapidly. Because national real estate data can be limited or sparse in specific sub-localities, certain niche property predictions may exhibit variance. 
 * **Next Steps:** Future iterations of this project will involve setting up web-scrapers to continuously feed live data into the pipeline to improve model accuracy across all sectors of Karachi.
 ---
@@ -85,9 +86,10 @@ This project was built as a coordinated full-stack engineering effort:
 ---
 
    🚀 𝗤𝘂𝗶𝗰𝗸 𝗦𝘁𝗮𝗿𝘁
-1. Clone the repository: `git clone https://github.com/zainbhumd/python-projects.git`
+Prerequisites: Python 3.12 and Git
+1. Clone the repository: `git clone https://github.com/zainbhumd/python-projects.git` and open the folder on VSC
 2. Install dependencies: `pip install -r requirements.txt`
-3. Launch the server: `uvicorn MAIN:app --reload`
+3. Launch the server: `uvicorn MAIN:app --reload` copy URL from the terminal and paste on your browser
 4. **Activity Logs** 
 To view the application's activity history (all additions, updates, or deletions), you can access the logs directly via the API once the server is running:
-http://127.0.0.1:5002/get_logs
+http://127.0.0.1:8000/get_logs
