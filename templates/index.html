@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+    <script>
+    const API_URL = "http://127.0.0.1:5002"; // This must match the port above
+    // ... your showView, searchProperties, addProperty, etc. ...
+</script>
+<head>
+    <meta charset="UTF-8">
+    <title>Karachi Real Estate Hub & AI Price Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+</head>
+
+<body class="bg-gray-100 p-8">
+
+
+
+<div class="max-w-4xl mx-auto">
+
+    <div class="flex gap-4 mb-8">
+
+        <button onclick="showView('ai-view');
+        " class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-bold">AI Price Predictor</button>
+        
+        <button onclick="showView('search-view');
+        " class="flex-1 bg-green-600 text-white py-3 rounded-lg font-bold">Manage Properties</button>
+
+    </div>
+    
+
+    <div id="ai-view" class="hidden bg-white p-8 rounded-xl shadow-lg">
+
+        <h2 class="text-2xl font-bold mb-6">AI Price Predictor</h2>
+        <div class="grid grid-cols-2 gap-4">
+    <input type="text" id="ai_location" placeholder="Area" class="p-3 border rounded">
+    <select id="ai_type" class="p-3 border rounded">
+        <option value="House">House</option>
+        <option value="Flat">Flat</option>
+        <option value="Upper Portion">Upper Portion</option>
+        <option value="Lower Portion">Lower Portion</option>
+    </select>
+    <input type="number" id="ai_baths" placeholder="Bathrooms" class="p-3 border rounded">
+    <input type="number" id="ai_beds" placeholder="Bedrooms" class="p-3 border rounded">
+    <select id="ai_purpose" class="p-3 border rounded">
+        <option value="Sale">For Sale</option>
+        <option value="Rent">For Rent</option>
+    </select>
+    <input type="number" id="ai_yards" placeholder="Area Size (Sq. Yards)" class="p-3 border rounded">
+</div>
+<button onclick="predictPrice()" class="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-bold">Predict Price</button>
+<h3 id="prediction_result" class="mt-4 font-bold text-center"></h3>
+
+    </div>
+
+    <div id="search-view" class="hidden">
+    <div class="bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-xl font-bold mb-4">Search Properties</h2>
+    <div class="grid grid-cols-2 gap-3">
+        <input type="text" id="s_area" placeholder="Area" class="p-2 border rounded">
+        <select id="s_type" class="p-2 border rounded">
+            <option value="">Any Type</option>
+            <option value="House">House</option>
+            <option value="Flat">Flat</option>
+            <option value="Upper Portion">Upper Portion</option>
+            <option value="Lower Portion">Lower Portion</option>
+        </select>
+        <input type="number" id="s_min_price" placeholder="Min Price" class="p-2 border rounded">
+        <input type="number" id="s_max_price" placeholder="Max Price" class="p-2 border rounded">
+        <select id="s_purpose" class="p-2 border rounded">
+            <option value="">Any Purpose</option>
+            <option value="Sale">For Sale</option>
+            <option value="Rent">For Rent</option>
+        </select>
+        <input type="number" id="s_beds" placeholder="Bedrooms (1/2/3/4/5+)" class="p-2 border rounded">
+        <input type="number" id="s_baths" placeholder="Bathrooms (1/2/3/4/5+)" class="p-2 border rounded">
+        <input type="number" id="s_min_sq" placeholder="Min Size (Sq. Yards)" class="p-2 border rounded">
+        <input type="number" id="s_max_sq" placeholder="Max Size (Sq. Yards)" class="p-2 border rounded">
+    </div>
+    <div id="results"></div>
+    <button onclick="searchProperties()" class="w-full mt-4 bg-green-600 text-white py-2 rounded font-bold">Search</button>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow-md">
+    <h2 class="font-bold mb-2">Add Property</h2>
+    <div class="grid grid-cols-2 gap-2">
+        <input type="text" id="a_id" placeholder="Property ID" class="p-2 border">
+        <input type="text" id="a_area" placeholder="Area" class="p-2 border">
+        <select id="a_type" class="p-2 border"><option value="House">House</option><option value="Flat">Flat</option><option value="Upper Portion">Upper Portion</option><option value="Lower Portion">Lower Portion</option></select>
+        <input type="number" id="a_price" placeholder="Price" class="p-2 border">
+        <select id="a_purpose" class="p-2 border"><option value="Rent">For Rent</option><option value="Sale">For Sale</option></select>
+        <input type="number" id="a_beds" placeholder="Bedrooms" class="p-2 border">
+        <input type="number" id="a_baths" placeholder="Bathrooms" class="p-2 border">
+        <input type="number" id="sq_yards" placeholder="Size" class="p-2 border">
+        <select id="a_unit" class="p-2 border"><option value="sq_yards">Sq. Yards</option><option value="sq_feet">Sq. Feet</option></select>
+    </div>
+    <button onclick="addProperty()" class="w-full bg-indigo-600 text-white py-2 mt-2 rounded">Add Property</button>
+</div>
+
+<div class="grid grid-cols-2 gap-4">
+    <div class="p-4 bg-white shadow rounded">
+        <h2 class="font-bold mb-2">Update Price</h2>
+        <input type="text" id="u_id" placeholder="Property ID" class="w-full p-2 border mb-2">
+        <input type="number" id="u_price" placeholder="New Price" class="w-full p-2 border mb-2">
+        <button onclick="updateProperty()" class="bg-yellow-600 text-white w-full py-2 rounded">Update</button>
+    </div>
+    <div class="p-4 bg-white shadow rounded">
+        <h2 class="font-bold mb-2">Delete Property</h2>
+        <input type="text" id="d_id" placeholder="Property ID" class="w-full p-2 border mb-2">
+        <button onclick="deleteProperty()" class="bg-red-600 text-white w-full py-2 rounded">Delete</button>
+    </div>
+</div>
+
+<script>
+
+    function showView(viewId) {
+
+        document.getElementById('ai-view').classList.add('hidden');
+
+        document.getElementById('search-view').classList.add('hidden');
+
+        document.getElementById(viewId).classList.remove('hidden');
+
+    }
+
+    // --- SEARCH ---
+    async function searchProperties() {
+        try{
+            const params = new URLSearchParams({
+            area: document.getElementById('s_area').value,
+            property_type: document.getElementById('s_type').value,
+            min_price: document.getElementById('s_min_price').value,
+            max_price: document.getElementById('s_max_price').value,
+            purpose: document.getElementById('s_purpose').value,
+            bedrooms: document.getElementById('s_beds').value,
+            bathrooms: document.getElementById('s_baths').value,
+            min_sq_yards: document.getElementById('s_min_sq').value,  // Updated to match your HTML
+            max_sq_yards: document.getElementById('s_max_sq').value   // Updated to match your HTML
+        });
+        const res = await fetch(`${API_URL}/properties?${params.toString()}`);
+        if (!res.ok) throw new Error("Server response not OK");
+        const data = await res.json();
+        if (!data || data.length === 0) {
+            document.getElementById('results').innerHTML = 
+                "<p class='text-red-500 font-bold'>No properties found matching those criteria.</p>";
+            return; // Stop here so it doesn't try to loop through nothing
+        }
+        const html = data.map(p => 
+            `<div class='p-4 border-b'>
+        <strong>ID:</strong> ${p.property_id} | 
+        <strong>Location:</strong> ${p.location} | 
+        <strong>Price:</strong> PKR ${p.final_price} | 
+        <strong>Beds:</strong> ${p.bedrooms} | 
+        <strong>Baths:</strong> ${p.bathrooms} | 
+        <strong>Type:</strong> ${p.property_type} | 
+        <strong>Size:</strong> ${p.area_sq_yards} sq yards
+    </div>`
+    ).join('');
+        document.getElementById('results').innerHTML = html;
+
+        }catch (err) {
+        console.error("Fetch error:", err);
+        document.getElementById('results').innerHTML = 
+            "<p class='text-red-500'>Error connecting to server. Please try again.</p>";
+      }
+     }
+   // --- ADD ---
+    async function addProperty() {
+        const payload = {
+            property_id: parseInt(document.getElementById('a_id').value),
+            location: document.getElementById('a_area').value,
+            property_type: document.getElementById('a_type').value,
+            final_price: parseFloat(document.getElementById('a_price').value),
+            purpose: document.getElementById('a_purpose').value,
+            bedrooms: parseInt(document.getElementById('a_beds').value),
+            bathrooms: parseInt(document.getElementById('a_baths').value),
+            // Instead of null, get the actual value from your input
+            area_sq_yards: parseFloat(document.getElementById('sq_yards').value) || 0,
+            area_sq_feet: document.getElementById('a_unit').value === 'sq_feet' ? parseFloat(document.getElementById('sq_yards').value) : parseFloat(document.getElementById('sq_yards').value) * 9
+        };
+        const res = await fetch(`${API_URL}/add_property`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        alert((await res.json()).message);
+    }
+
+    // --- UPDATE ---
+    async function updateProperty() {
+    const id = document.getElementById('u_id').value;
+    const newPrice = document.getElementById('u_price').value;
+
+    if (!id || !newPrice) {
+        return alert("Please enter both a Property ID and a New Price.");
+    }
+
+    const payload = { final_price: parseFloat(newPrice) };
+
+    const res = await fetch(`${API_URL}/update_property/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+    
+    const data = await res.json();
+    alert(data.message);
+}
+    // --- DELETE ---
+    async function deleteProperty() {
+        const id = document.getElementById('d_id').value;
+        const res = await fetch(`${API_URL}/delete_property/${id}`, { method: "DELETE" });
+        alert((await res.json()).message);
+    }
+
+    // --- PREDICT ---
+    async function predictPrice() {
+    // 1. Collect values from the AI Predictor input fields
+    const payload = {
+        location: document.getElementById('ai_location').value,
+        property_type: document.getElementById('ai_type').value,
+        bathrooms: document.getElementById('ai_baths').value,
+        bedrooms: document.getElementById('ai_beds').value,
+        purpose: document.getElementById('ai_purpose').value,
+        area_sq_yards: document.getElementById('ai_yards').value
+    };
+
+    // 2. Send the request to your FastAPI backend
+    try {
+        const response = await fetch(`${API_URL}/predict_price`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        // 3. Display the result
+        if (data.predicted_price) {
+            document.getElementById('prediction_result').innerText = 
+                `Predicted Price: PKR ${data.predicted_price.toLocaleString()}`;
+        } else {
+            document.getElementById('prediction_result').innerText = 
+                "Error: " + (data.error || "Could not generate prediction.");
+        }
+    } catch (err) {
+        console.error(err);
+        document.getElementById('prediction_result').innerText = "Cannot connect to server.";
+    }
+}
+</script>
